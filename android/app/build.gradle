@@ -25,8 +25,17 @@ apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
 apply from: "$flutterRoot/packages/flutter_tools/gradle/flutter.gradle"
 
+def keyPropertiesFile = rootProject.file('key.properties')
+def keyProperties = new Properties()
+
+if (keyPropertiesFile.exists()) {
+    keyProperties.load(new FileInputStream(keyPropertiesFile))
+} else {
+    throw new GradleException("Key properties file not found!")
+}
+
 android {
-    compileSdkVersion 33 // Updated to SDK version 33
+    compileSdkVersion 33
     ndkVersion flutter.ndkVersion
 
     compileOptions {
@@ -43,16 +52,26 @@ android {
     }
 
     defaultConfig {
-        applicationId "com.example.untitled"
+        applicationId "com.untitled" // Change to your desired package name
         minSdkVersion 21
-        targetSdkVersion 33 // Updated to SDK version 33
+        targetSdkVersion 33
         versionCode flutterVersionCode.toInteger()
         versionName flutterVersionName
     }
 
+    signingConfigs {
+        release {
+            storeFile file(keyProperties['storeFile'])
+            storePassword keyProperties['storePassword']
+            keyAlias keyProperties['keyAlias']
+            keyPassword keyProperties['keyPassword']
+        }
+    }
+
     buildTypes {
         release {
-            signingConfig signingConfigs.debug
+            signingConfig signingConfigs.release
+            // Add other release configurations if needed
         }
     }
 }
